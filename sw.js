@@ -1,5 +1,5 @@
 // Service Worker básico para PWA - "Gera" o app e salva os dados no aparelho
-var cacheName = 'meu-congelador-app-v14';
+var cacheName = 'meu-congelador-app-v15';
 var filesToCache = [
   '/',
   'index.html',
