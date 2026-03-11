@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Congelador - App</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6A5ACD">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --lavanda: #F3F3FF;
+            --roxo-medio: #9370DB;
+            --roxo-escuro: #6A5ACD;
+            --branco: #ffffff;
+            --sucesso: #4CAF50;
+            --erro: #ff4d4d;
+            --cinza: #f8f9fa;
+        }
+
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--lavanda); margin: 0; padding-bottom: 50px; }
+
+        header { background-color: var(--roxo-escuro); color: white; padding: 15px; text-align: center; }
+
+        .nav-tabs {
+            display: flex; justify-content: space-around; background: var(--branco);
+            position: sticky; top: 0; z-index: 100; padding: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn { border: none; background: none; color: var(--roxo-medio); font-weight: 600; cursor: pointer; padding: 10px; font-size: 16px; width: 100%; }
+        .tab-btn.active { color: var(--roxo-escuro); border-bottom: 3px solid var(--roxo-escuro); }
+
+        .content { padding: 10px; display: none; max-width: 800px; margin: auto; }
+        .content.active { display: block; }
+
+        .category-title { color: var(--roxo-escuro); margin: 20px 0 10px; border-left: 5px solid var(--roxo-medio); padding-left: 10px; }
+
+        .btn-add-novo { background: var(--roxo-escuro); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; width: 100%; cursor: pointer; margin-bottom: 15px; font-size: 15px; }
+        #form-novo-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px dashed var(--roxo-medio); display: none; }
+        select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; margin-top: 5px; font-family: 'Poppins'; }
+
+        .linha-compra { background: var(--branco); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
+        .acoes-card { position: absolute; top: 12px; right: 12px; display: flex; gap: 5px; }
+        .btn-mini { background: #eee; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-mini:hover { background: #ddd; }
+        .btn-mini.del { color: var(--erro); }
+
+        .info-carne { margin-bottom: 10px; padding-right: 50px; }
+        .nome-carne { font-weight: 600; font-size: 16px; color: #333; display: block; }
+        .dica-carne { font-size: 12px; color: var(--roxo-escuro); display: block; line-height: 1.3; margin-top: 2px; }
+        .historico-carne { font-size: 11px; color: #888; margin-top: 4px; display: inline-block; background: #eee; padding: 2px 6px; border-radius: 4px; }
+
+        .inputs-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .input-group { flex: 1; min-width: 80px; }
+        .input-group label { font-size: 11px; color: #666; font-weight: 600; display: block; }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; margin-top: 5px; }
+        input:focus { border-color: var(--roxo-medio); }
+
+        .total-gasto { font-weight: 600; color: var(--sucesso); font-size: 15px; min-width: 100px; text-align: right; }
+
+        .btn { background: var(--roxo-medio); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
+        .btn-enviar { background: #4a90e2; }
+        .btn-x { background: var(--erro); color: white; border-radius: 50%; width: 28px; height: 28px; padding: 0; border: none; cursor: pointer; font-size: 12px; }
+        
+        .btn-toggle { background: #eef; color: var(--roxo-escuro); border: 1px solid var(--roxo-medio); padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 10px; font-size: 13px; }
+
+        .box-estoque { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
+        
+        .form-preparo { background: #f9f9ff; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--roxo-medio); }
+        .form-preparo label { font-size: 11px; font-weight: bold; color: var(--roxo-escuro); margin-bottom: 5px; display: block; }
+        
+        .linha-pote { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 12px; border-radius: 8px; margin-top: 8px; font-size: 0.9rem; border-left: 4px solid var(--roxo-escuro); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<header><h3>Meu Congelador 🥩</h3></header>
+
+<nav class="nav-tabs">
+    <button class="tab-btn active" onclick="openTab('compras')">📝 Compras</button>
+    <button class="tab-btn" onclick="openTab('estoque')">❄️ Congelador</button>
+</nav>
+
+<div id="compras" class="content active">
+    <button class="btn-add-novo" onclick="toggleFormNovo()">+ Adicionar Nova Mistura</button>
+    <div id="form-novo-item">
+        <label style="font-size:12px; font-weight:bold;">Nome da Carne:</label>
+        <input type="text" id="novo-nome" placeholder="Ex: Carne de Sol">
+        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">Dica/Sugestão de uso:</label>
+        <input type="text" id="nova-dica" placeholder="Ex: Fritar na manteiga">
+        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">Categoria:</label>
+        <select id="nova-cat">
+            <option value="Bovinos">Bovinos</option>
+            <option value="Frangos">Frangos</option>
+            <option value="Suínos e Outros">Suínos e Outros</option>
+        </select>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn" style="background:var(--sucesso);" onclick="salvarNovoItem()">Salvar</button>
+            <button class="btn" style="background:#ccc; color:#333;" onclick="toggleFormNovo()">Cancelar</button>
+        </div>
+    </div>
+    <div id="tabela-compras"></div>
+</div>
+
+<div id="estoque" class="content">
+    <h3 class="category-title">Controle de Potes</h3>
+    <div id="estoque-container"></div>
+</div>
+
+<script>
+    const catalogoPadrao = [{id:"moida",cat:"Bovinos",nome:"Carne Moída",dica:"Patinho/Acém"},{id:"panela",cat:"Bovinos",nome:"Carne Panela",dica:"Músculo/Acém"},{id:"bife",cat:"Bovinos",nome:"Bife",dica:"Alcatra/C.Filé"},{id:"figado",cat:"Bovinos",nome:"Fígado",dica:"Iscas"},{id:"sassami",cat:"Frangos",nome:"Sassami",dica:"Filezinho"},{id:"peito",cat:"Frangos",nome:"Peito",dica:"Bifes"},{id:"tulipa",cat:"Frangos",nome:"Tulipa",dica:"Assar"},{id:"bisteca",cat:"Suínos e Outros",nome:"Bisteca",dica:"Com osso"},{id:"calabresa",cat:"Suínos e Outros",nome:"Calabresa",dica:"Defumada"},{id:"peixe",cat:"Suínos e Outros",nome:"Filé de Peixe",dica:"Tilápia"}];
+    let db = JSON.parse(localStorage.getItem('meatAppV14')) || {catalogo:catalogoPadrao,historico:{},estoque:[]};
+    function save() { localStorage.setItem('meatAppV14', JSON.stringify(db)); }
+    function init() { renderListaCompras(); renderEstoque(); }
+    function toggleFormNovo() { document.getElementById('form-novo-item').style.display = document.getElementById('form-novo-item').style.display === "block" ? "none" : "block"; }
+    function salvarNovoItem() { let n = document.getElementById('novo-nome').value; let d = document.getElementById('nova-dica').value; let c = document.getElementById('nova-cat').value; if(!n) return; db.catalogo.push({id:"id_"+Date.now(),cat:c,nome:n,dica:d}); save(); toggleFormNovo(); renderListaCompras(); }
+    function editarItemCatalogo(idCard) { let i = db.catalogo.findIndex(i => i.id === idCard); if(i>-1) { let item = db.catalogo[i]; let nn = prompt("Editar Nome:", item.nome); if(nn) item.nome = nn; let nd = prompt("Editar Dica:", item.dica); if(nd!==null) item.dica = nd; save(); renderListaCompras(); } }
+    function excluirItemCatalogo(idCard) { if(confirm("Apagar da lista?")) { db.catalogo = db.catalogo.filter(i => i.id !== idCard); save(); renderListaCompras(); } }
+    function tratarPeso(v) { let val = parseFloat(v); return val >= 10 ? val / 1000 : val; }
+    function formatarPeso(k) { return k < 1 ? (Math.round(k*1000))+"g" : k.toFixed(2)+"kg"; }
+    function formatarDinheiro(v) { return "R$ "+parseFloat(v).toFixed(2).replace('.', ','); }
+    function calcularTotal(id) { let q = document.getElementById(`qtd-${id}`).value; let p = document.getElementById(`preco-${id}`).value; document.getElementById(`total-${id}`).innerText = (q&&p) ? formatarDinheiro(tratarPeso(q) * parseFloat(p)) : "R$ 0,00"; }
+    function renderListaCompras() { const cont = document.getElementById('tabela-compras'); cont.innerHTML = ""; ["Bovinos", "Frangos", "Suínos e Outros"].forEach(catNome => { let itens = db.catalogo.filter(i => i.cat === catNome); if(itens.length>0) { cont.innerHTML += `<h3 class="category-title">${catNome}</h3>`; itens.forEach(item => { let histText = db.historico[item.id] ? `<span class="historico-carne">Última: ${formatarPeso(db.historico[item.id].qtd)} a ${formatarDinheiro(db.historico[item.id].preco)}/kg</span>` : ''; cont.innerHTML += `<div class="linha-compra"><div class="acoes-card"><button class="btn-mini" onclick="editarItemCatalogo('${item.id}')">✎</button><button class="btn-mini del" onclick="excluirItemCatalogo('${item.id}')">✕</button></div><div class="info-carne"><span class="nome-carne">${item.nome}</span>${item.dica ? `<span class="dica-carne">💡 ${item.dica}</span>` : ''}${histText}</div><div class="inputs-row"><div class="input-group"><label>Qtd</label><input type="number" id="qtd-${item.id}" oninput="calcularTotal('${item.id}')"></div><div class="input-group"><label>R$ / Kg</label><input type="number" id="preco-${item.id}" oninput="calcularTotal('${item.id}')"></div><div class="total-gasto" id="total-${item.id}">R$ 0,00</div></div><button class="btn btn-enviar" onclick="enviarCongelador('${item.id}', '${item.nome}')">❄️ Enviar ao Congelador</button></div>`; }); } }); }
+    function enviarCongelador(id, nome) { let qI = document.getElementById(`qtd-${id}`).value; let pI = document.getElementById(`preco-${id}`).value; if (!qI || !pI) return alert("Preencha!"); let q = tratarPeso(qI); let p = parseFloat(pI); db.historico[id] = { qtd: q, preco: p, data: new Date().toLocaleDateString('pt-BR') }; db.estoque.push({ idObj: Date.now(), nome: nome, qtd: q, totalGasto: q * p, expandido: true, potes: [] }); document.getElementById(`qtd-${id}`).value = ""; document.getElementById(`preco-${id}`).value = ""; document.getElementById(`total-${id}`).innerText = "R$ 0,00"; save(); renderListaCompras(); renderEstoque(); }
+    function renderEstoque() { const cont = document.getElementById('estoque-container'); cont.innerHTML = db.estoque.length === 0 ? "<p style='text-align:center; color:#999'>Vazio.</p>" : db.estoque.map((it, i) => { let qP = it.potes.length; let potesHTML = (it.expandido && qP > 0) ? `<div style="margin-top:10px">` + it.potes.map((p, pIdx) => `<div class="linha-pote"><span><strong>${p.prato}</strong> (${p.numero}/${p.total})</span><button class="btn-x" onclick="removerPote(${i}, ${pIdx})">✕</button></div>`).join('') + `</div>` : ""; let btnSanfona = qP > 0 ? `<button class="btn-toggle" onclick="togglePotes(${i})">${it.expandido ? '➖ Ocultar' : '➕ Ver'} Potes (${qP})</button>` : ""; return `<div class="box-estoque"><div style="display:flex; justify-content:space-between"><strong>${it.nome} (${formatarPeso(it.qtd)})</strong><span style="color:var(--sucesso); font-size:12px; font-weight:bold">${formatarDinheiro(it.totalGasto)}</span></div><div class="form-preparo"><label>Adicionar Pote:</label><div style="display:grid; grid-template-columns: 2fr 1fr; gap:5px"><input type="text" id="novo-prato-${i}" placeholder="Prato..."><input type="number" id="novo-potes-${i}" placeholder="Qtd"></div><button class="btn" style="background:var(--sucesso); padding: 8px; font-size: 13px; margin-top:8px" onclick="adicionarPrato(${i})">+ Incluir</button></div>${btnSanfona}${potesHTML}<button class="btn" style="background:#999; font-size:11px; margin-top:15px;" onclick="limparDoCongelador(${i})">Acabou tudo!</button></div>`; }).join(''); }
+    function adicionarPrato(idx) { let nP = document.getElementById(`novo-prato-${idx}`).value; let qP = parseInt(document.getElementById(`novo-potes-${idx}`).value); if (!nP || isNaN(qP) || qP <= 0) return alert("Preencha!"); for (let j = 1; j <= qP; j++) { db.estoque[idx].potes.push({ prato: nP, numero: j, total: qP }); } db.estoque[idx].expandido = true; save(); renderEstoque(); }
+    function togglePotes(idx) { db.estoque[idx].expandido = !db.estoque[idx].expandido; save(); renderEstoque(); }
+    function removerPote(i, pIdx) { db.estoque[i].potes.splice(pIdx, 1); if(db.estoque[i].potes.length === 0) it.expandido = false; save(); renderEstoque(); }
+    function limparDoCongelador(idx) { if(confirm("Acabou?")) { db.estoque.splice(idx, 1); save(); renderEstoque(); } }
+    function openTab(t) { document.querySelectorAll('.content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(t).classList.add('active'); event.currentTarget.classList.add('active'); }
+    
+    // Registro do Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').then(function(res) {
+          console.log('ServiceWorker registrado');
+        });
+      });
+    }
+
+    init();
+</script>
+</body>
+</html>
