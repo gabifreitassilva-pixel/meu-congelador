@@ -1,148 +1,846 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Congelador - App</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6A5ACD">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Gestão da Casa - Compras e Congelador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        :root {
-            --lavanda: #F3F3FF;
-            --roxo-medio: #9370DB;
-            --roxo-escuro: #6A5ACD;
-            --branco: #ffffff;
-            --sucesso: #4CAF50;
-            --erro: #ff4d4d;
-            --cinza: #f8f9fa;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f3ff; /* violet-50 */
         }
-
-        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--lavanda); margin: 0; padding-bottom: 50px; }
-
-        header { background-color: var(--roxo-escuro); color: white; padding: 15px; text-align: center; }
-
-        .nav-tabs {
-            display: flex; justify-content: space-around; background: var(--branco);
-            position: sticky; top: 0; z-index: 100; padding: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .tab-btn { border: none; background: none; color: var(--roxo-medio); font-weight: 600; cursor: pointer; padding: 10px; font-size: 16px; width: 100%; }
-        .tab-btn.active { color: var(--roxo-escuro); border-bottom: 3px solid var(--roxo-escuro); }
-
-        .content { padding: 10px; display: none; max-width: 800px; margin: auto; }
-        .content.active { display: block; }
-
-        .category-title { color: var(--roxo-escuro); margin: 20px 0 10px; border-left: 5px solid var(--roxo-medio); padding-left: 10px; }
-
-        .btn-add-novo { background: var(--roxo-escuro); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; width: 100%; cursor: pointer; margin-bottom: 15px; font-size: 15px; }
-        #form-novo-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px dashed var(--roxo-medio); display: none; }
-        select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; margin-top: 5px; font-family: 'Poppins'; }
-
-        .linha-compra { background: var(--branco); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .acoes-card { position: absolute; top: 12px; right: 12px; display: flex; gap: 5px; }
-        .btn-mini { background: #eee; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .btn-mini:hover { background: #ddd; }
-        .btn-mini.del { color: var(--erro); }
-
-        .info-carne { margin-bottom: 10px; padding-right: 50px; }
-        .nome-carne { font-weight: 600; font-size: 16px; color: #333; display: block; }
-        .dica-carne { font-size: 12px; color: var(--roxo-escuro); display: block; line-height: 1.3; margin-top: 2px; }
-        .historico-carne { font-size: 11px; color: #888; margin-top: 4px; display: inline-block; background: #eee; padding: 2px 6px; border-radius: 4px; }
-
-        .inputs-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-        .input-group { flex: 1; min-width: 80px; }
-        .input-group label { font-size: 11px; color: #666; font-weight: 600; display: block; }
         
+        .item-text { transition: all 0.3s ease; }
+        .item-checked .item-text { text-decoration: line-through; color: #a78bfa; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(237, 233, 254, 0.5); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c084fc; }
+        
+        input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; margin-top: 5px; }
-        input:focus { border-color: var(--roxo-medio); }
-
-        .total-gasto { font-weight: 600; color: var(--sucesso); font-size: 15px; min-width: 100px; text-align: right; }
-
-        .btn { background: var(--roxo-medio); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
-        .btn-enviar { background: #4a90e2; }
-        .btn-x { background: var(--erro); color: white; border-radius: 50%; width: 28px; height: 28px; padding: 0; border: none; cursor: pointer; font-size: 12px; }
         
-        .btn-toggle { background: #eef; color: var(--roxo-escuro); border: 1px solid var(--roxo-medio); padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 10px; font-size: 13px; }
-
-        .box-estoque { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
-        
-        .form-preparo { background: #f9f9ff; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--roxo-medio); }
-        .form-preparo label { font-size: 11px; font-weight: bold; color: var(--roxo-escuro); margin-bottom: 5px; display: block; }
-        
-        .linha-pote { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 12px; border-radius: 8px; margin-top: 8px; font-size: 0.9rem; border-left: 4px solid var(--roxo-escuro); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* Ocultar elementos via classe */
+        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="p-2 md:p-6 text-gray-800 min-h-screen relative pb-24 md:pb-8 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-white">
 
-<header><h3>Meu Congelador 🥩</h3></header>
+    <div class="max-w-5xl mx-auto bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(139,92,246,0.2)] overflow-hidden flex flex-col h-[95vh] md:h-auto border border-white">
+        
+        <!-- CABEÇALHO GERAL E ABAS -->
+        <div class="bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500 p-5 md:p-8 text-white text-center flex-shrink-0 relative shadow-lg shadow-purple-500/20 z-10">
+            <h1 class="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight drop-shadow-sm">Gestão da Casa</h1>
+            <p class="text-violet-100 opacity-90 text-xs md:text-sm font-medium">Controle Mensal • 3 Pessoas 👨‍👩‍👦</p>
+            
+            <!-- Navegação das Abas -->
+            <div class="flex justify-center gap-2 mt-6 max-w-sm mx-auto bg-black/10 p-1.5 rounded-2xl backdrop-blur-md">
+                <button id="btn-aba-compras" onclick="setAba('compras')" class="flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all bg-white text-violet-700 shadow-sm flex items-center justify-center gap-2">
+                    🛒 Compras
+                </button>
+                <button id="btn-aba-congelador" onclick="setAba('congelador')" class="flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all text-violet-100 hover:bg-white/10 flex items-center justify-center gap-2">
+                    ❄️ Congelador
+                </button>
+            </div>
+        </div>
 
-<nav class="nav-tabs">
-    <button class="tab-btn active" onclick="openTab('compras')">📝 Compras</button>
-    <button class="tab-btn" onclick="openTab('estoque')">❄️ Congelador</button>
-</nav>
+        <!-- ======================================================= -->
+        <!-- ABA 1: COMPRAS MENSAIS -->
+        <!-- ======================================================= -->
+        <div id="tab-compras" class="flex flex-col flex-1 overflow-hidden h-full">
+            
+            <!-- Controles Mês/Mercado e Total (Fixo no topo da aba compras) -->
+            <div class="p-4 md:p-6 bg-white/50 border-b border-violet-100 flex-shrink-0">
+                <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto mb-4">
+                    <div class="flex-1 bg-white rounded-2xl p-2.5 flex items-center border border-violet-100 shadow-sm focus-within:border-violet-400 transition-all">
+                        <span class="text-violet-300 ml-2 mr-2 text-lg">📅</span>
+                        <input type="month" id="input-mes" onchange="mudarMes(this.value)" class="bg-transparent text-violet-900 w-full outline-none font-bold text-sm md:text-base cursor-pointer">
+                    </div>
+                    <div class="flex-1 bg-white rounded-2xl p-2.5 flex items-center border border-violet-100 shadow-sm focus-within:border-violet-400 transition-all">
+                        <span class="text-violet-300 ml-2 mr-2 text-lg">🛒</span>
+                        <input type="text" id="input-mercado" onchange="salvarConfigCompras()" placeholder="Local da compra..." class="bg-transparent text-violet-900 w-full outline-none font-bold text-sm md:text-base placeholder-violet-300">
+                    </div>
+                </div>
 
-<div id="compras" class="content active">
-    <button class="btn-add-novo" onclick="toggleFormNovo()">+ Adicionar Nova Mistura</button>
-    <div id="form-novo-item">
-        <label style="font-size:12px; font-weight:bold;">Nome da Carne:</label>
-        <input type="text" id="novo-nome" placeholder="Ex: Carne de Sol">
-        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">Dica/Sugestão de uso:</label>
-        <input type="text" id="nova-dica" placeholder="Ex: Fritar na manteiga">
-        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">Categoria:</label>
-        <select id="nova-cat">
-            <option value="Bovinos">Bovinos</option>
-            <option value="Frangos">Frangos</option>
-            <option value="Suínos e Outros">Suínos e Outros</option>
-        </select>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="btn" style="background:var(--sucesso);" onclick="salvarNovoItem()">Salvar</button>
-            <button class="btn" style="background:#ccc; color:#333;" onclick="toggleFormNovo()">Cancelar</button>
+                <div class="flex justify-between items-end bg-gradient-to-r from-violet-50 to-fuchsia-50 p-4 rounded-2xl border border-violet-100">
+                    <div class="text-left">
+                        <span class="text-violet-400 text-[10px] md:text-xs uppercase tracking-widest font-bold block mb-1">Total Gasto / Previsto</span>
+                        <span class="text-2xl md:text-4xl font-black text-violet-900 tracking-tight" id="valor-total-geral">R$ 0,00</span>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <span class="text-violet-400 text-[10px] md:text-xs uppercase tracking-widest font-bold block mb-1">Progresso</span>
+                        <span id="texto-progresso" class="text-xs md:text-sm font-bold text-violet-700 bg-white px-3 py-1 rounded-xl shadow-sm border border-violet-100">0%</span>
+                    </div>
+                </div>
+                
+                <div class="w-full bg-violet-100 rounded-full h-2 mt-4 overflow-hidden shadow-inner">
+                    <div id="barra-progresso" class="bg-gradient-to-r from-violet-400 to-fuchsia-500 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Lista de Categorias e Itens rolável -->
+            <div id="lista-container" class="p-2 md:p-6 space-y-4 md:space-y-6 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 bg-transparent">
+                <!-- Renderizado via JS -->
+            </div>
+
+            <!-- Rodapé de Ações Compras -->
+            <div class="bg-white/80 backdrop-blur-lg p-4 border-t border-violet-100 flex justify-center shadow-[0_-10px_30px_-10px_rgba(139,92,246,0.1)] flex-shrink-0 rounded-b-[2rem]">
+                <button onclick="abrirModal('modal-avancar')" class="px-6 py-3.5 bg-violet-50 text-violet-600 font-extrabold rounded-2xl hover:bg-violet-100 hover:text-violet-700 transition-all flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto border border-violet-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    Salvar Histórico e Avançar Mês
+                </button>
+            </div>
+            
+            <!-- FAB Compras -->
+            <button onclick="abrirModalItem()" class="absolute bottom-24 right-6 md:bottom-28 md:right-10 bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white p-4 rounded-full shadow-xl shadow-purple-500/40 hover:shadow-purple-500/60 transition-all duration-300 transform hover:-translate-y-1 z-40 group focus:outline-none">
+                <svg class="w-7 h-7 transform transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+            </button>
+        </div>
+
+
+        <!-- ======================================================= -->
+        <!-- ABA 2: CONGELADOR SIMPLIFICADO -->
+        <!-- ======================================================= -->
+        <div id="tab-congelador" class="hidden flex flex-col flex-1 overflow-hidden h-full bg-blue-50/30 rounded-b-[2rem]">
+            
+            <div class="p-4 md:p-6 bg-white/50 border-b border-blue-100 flex justify-between items-center flex-shrink-0">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-blue-900 tracking-tight">Estoque de Potes</h2>
+                    <p class="text-xs md:text-sm text-blue-500 font-medium">O que temos pronto para comer?</p>
+                </div>
+                <button onclick="abrirModalPote()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold shadow-md shadow-blue-500/30 transition-all text-sm flex items-center gap-2 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                    Nova Mistura
+                </button>
+            </div>
+
+            <!-- Grade do Congelador -->
+            <div class="p-4 md:p-6 overflow-y-auto custom-scrollbar flex-1">
+                <div id="estoque-congelador-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Renderizado via JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- MODAIS GERAIS (Janelas sobrepostas) -->
+    <!-- ======================================================= -->
+    
+    <!-- Modal Item de Compra -->
+    <div id="modal-item" class="fixed inset-0 bg-violet-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-violet-100">
+            <div class="p-5 border-b border-violet-100 flex justify-between items-center bg-violet-50/50">
+                <h3 class="text-xl font-extrabold text-violet-900" id="modal-item-titulo">Adicionar Produto</h3>
+                <button onclick="fecharModal('modal-item')" class="text-violet-400 hover:text-fuchsia-500 p-1.5 bg-white rounded-xl shadow-sm border border-violet-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="modal-item-id">
+                <div>
+                    <label class="block text-xs font-bold text-violet-900 mb-1">Nome do Produto</label>
+                    <input type="text" id="modal-item-nome" placeholder="Ex: Macarrão" class="w-full px-4 py-3 rounded-xl border border-violet-200 focus:ring-2 focus:ring-violet-400 outline-none font-medium bg-violet-50/30">
+                </div>
+                <div class="flex gap-3">
+                    <div class="w-1/3">
+                        <label class="block text-xs font-bold text-violet-900 mb-1">Qtd</label>
+                        <input type="number" id="modal-item-qtd" min="0.1" step="0.1" value="1" class="w-full px-4 py-3 rounded-xl border border-violet-200 outline-none text-center font-bold bg-violet-50/30">
+                    </div>
+                    <div class="w-2/3">
+                        <label class="block text-xs font-bold text-violet-900 mb-1">Preço Unitário (Opcional)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3.5 text-violet-400 font-bold text-sm">R$</span>
+                            <input type="number" step="0.01" min="0" id="modal-item-preco" placeholder="0.00" class="w-full pl-9 pr-4 py-3 rounded-xl border border-violet-200 outline-none font-bold bg-violet-50/30 text-right">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-violet-900 mb-1">Categoria</label>
+                    <select id="modal-item-categoria" class="w-full px-4 py-3 rounded-xl border border-violet-200 outline-none font-medium bg-violet-50/30 cursor-pointer"></select>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button onclick="fecharModal('modal-item')" class="flex-1 py-3.5 bg-violet-50 text-violet-700 font-bold rounded-xl border border-violet-200">Cancelar</button>
+                    <button onclick="salvarModalItem()" class="flex-1 py-3.5 bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold rounded-xl shadow-md">Salvar</button>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="tabela-compras"></div>
-</div>
 
-<div id="estoque" class="content">
-    <h3 class="category-title">Controle de Potes</h3>
-    <div id="estoque-container"></div>
-</div>
+    <!-- Modal Editar Categoria (Compras) -->
+    <div id="modal-categoria" class="fixed inset-0 bg-violet-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden border border-violet-100">
+            <div class="p-5 border-b border-violet-100 flex justify-between items-center bg-violet-50/50">
+                <h3 class="text-xl font-extrabold text-violet-900">Editar Categoria</h3>
+                <button onclick="fecharModal('modal-categoria')" class="text-violet-400 hover:text-fuchsia-500 p-1.5 bg-white rounded-xl border border-violet-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="modal-cat-id">
+                <div class="flex gap-3">
+                    <div class="w-1/4">
+                        <label class="block text-xs font-bold text-violet-900 mb-1">Ícone</label>
+                        <input type="text" id="modal-cat-icone" maxlength="2" class="w-full px-2 py-3 rounded-xl border border-violet-200 outline-none text-center text-xl bg-violet-50/30">
+                    </div>
+                    <div class="w-3/4">
+                        <label class="block text-xs font-bold text-violet-900 mb-1">Nome</label>
+                        <input type="text" id="modal-cat-nome" class="w-full px-4 py-3 rounded-xl border border-violet-200 outline-none font-medium bg-violet-50/30">
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button onclick="fecharModal('modal-categoria')" class="flex-1 py-3.5 bg-violet-50 text-violet-700 font-bold rounded-xl border border-violet-200">Cancelar</button>
+                    <button onclick="salvarModalCategoria()" class="flex-1 py-3.5 bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold rounded-xl shadow-md">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-    const catalogoPadrao = [{id:"moida",cat:"Bovinos",nome:"Carne Moída",dica:"Patinho/Acém"},{id:"panela",cat:"Bovinos",nome:"Carne Panela",dica:"Músculo/Acém"},{id:"bife",cat:"Bovinos",nome:"Bife",dica:"Alcatra/C.Filé"},{id:"figado",cat:"Bovinos",nome:"Fígado",dica:"Iscas"},{id:"sassami",cat:"Frangos",nome:"Sassami",dica:"Filezinho"},{id:"peito",cat:"Frangos",nome:"Peito",dica:"Bifes"},{id:"tulipa",cat:"Frangos",nome:"Tulipa",dica:"Assar"},{id:"bisteca",cat:"Suínos e Outros",nome:"Bisteca",dica:"Com osso"},{id:"calabresa",cat:"Suínos e Outros",nome:"Calabresa",dica:"Defumada"},{id:"peixe",cat:"Suínos e Outros",nome:"Filé de Peixe",dica:"Tilápia"}];
-    let db = JSON.parse(localStorage.getItem('meatAppV14')) || {catalogo:catalogoPadrao,historico:{},estoque:[]};
-    function save() { localStorage.setItem('meatAppV14', JSON.stringify(db)); }
-    function init() { renderListaCompras(); renderEstoque(); }
-    function toggleFormNovo() { document.getElementById('form-novo-item').style.display = document.getElementById('form-novo-item').style.display === "block" ? "none" : "block"; }
-    function salvarNovoItem() { let n = document.getElementById('novo-nome').value; let d = document.getElementById('nova-dica').value; let c = document.getElementById('nova-cat').value; if(!n) return; db.catalogo.push({id:"id_"+Date.now(),cat:c,nome:n,dica:d}); save(); toggleFormNovo(); renderListaCompras(); }
-    function editarItemCatalogo(idCard) { let i = db.catalogo.findIndex(i => i.id === idCard); if(i>-1) { let item = db.catalogo[i]; let nn = prompt("Editar Nome:", item.nome); if(nn) item.nome = nn; let nd = prompt("Editar Dica:", item.dica); if(nd!==null) item.dica = nd; save(); renderListaCompras(); } }
-    function excluirItemCatalogo(idCard) { if(confirm("Apagar da lista?")) { db.catalogo = db.catalogo.filter(i => i.id !== idCard); save(); renderListaCompras(); } }
-    function tratarPeso(v) { let val = parseFloat(v); return val >= 10 ? val / 1000 : val; }
-    function formatarPeso(k) { return k < 1 ? (Math.round(k*1000))+"g" : k.toFixed(2)+"kg"; }
-    function formatarDinheiro(v) { return "R$ "+parseFloat(v).toFixed(2).replace('.', ','); }
-    function calcularTotal(id) { let q = document.getElementById(`qtd-${id}`).value; let p = document.getElementById(`preco-${id}`).value; document.getElementById(`total-${id}`).innerText = (q&&p) ? formatarDinheiro(tratarPeso(q) * parseFloat(p)) : "R$ 0,00"; }
-    function renderListaCompras() { const cont = document.getElementById('tabela-compras'); cont.innerHTML = ""; ["Bovinos", "Frangos", "Suínos e Outros"].forEach(catNome => { let itens = db.catalogo.filter(i => i.cat === catNome); if(itens.length>0) { cont.innerHTML += `<h3 class="category-title">${catNome}</h3>`; itens.forEach(item => { let histText = db.historico[item.id] ? `<span class="historico-carne">Última: ${formatarPeso(db.historico[item.id].qtd)} a ${formatarDinheiro(db.historico[item.id].preco)}/kg</span>` : ''; cont.innerHTML += `<div class="linha-compra"><div class="acoes-card"><button class="btn-mini" onclick="editarItemCatalogo('${item.id}')">✎</button><button class="btn-mini del" onclick="excluirItemCatalogo('${item.id}')">✕</button></div><div class="info-carne"><span class="nome-carne">${item.nome}</span>${item.dica ? `<span class="dica-carne">💡 ${item.dica}</span>` : ''}${histText}</div><div class="inputs-row"><div class="input-group"><label>Qtd</label><input type="number" id="qtd-${item.id}" oninput="calcularTotal('${item.id}')"></div><div class="input-group"><label>R$ / Kg</label><input type="number" id="preco-${item.id}" oninput="calcularTotal('${item.id}')"></div><div class="total-gasto" id="total-${item.id}">R$ 0,00</div></div><button class="btn btn-enviar" onclick="enviarCongelador('${item.id}', '${item.nome}')">❄️ Enviar ao Congelador</button></div>`; }); } }); }
-    function enviarCongelador(id, nome) { let qI = document.getElementById(`qtd-${id}`).value; let pI = document.getElementById(`preco-${id}`).value; if (!qI || !pI) return alert("Preencha!"); let q = tratarPeso(qI); let p = parseFloat(pI); db.historico[id] = { qtd: q, preco: p, data: new Date().toLocaleDateString('pt-BR') }; db.estoque.push({ idObj: Date.now(), nome: nome, qtd: q, totalGasto: q * p, expandido: true, potes: [] }); document.getElementById(`qtd-${id}`).value = ""; document.getElementById(`preco-${id}`).value = ""; document.getElementById(`total-${id}`).innerText = "R$ 0,00"; save(); renderListaCompras(); renderEstoque(); }
-    function renderEstoque() { const cont = document.getElementById('estoque-container'); cont.innerHTML = db.estoque.length === 0 ? "<p style='text-align:center; color:#999'>Vazio.</p>" : db.estoque.map((it, i) => { let qP = it.potes.length; let potesHTML = (it.expandido && qP > 0) ? `<div style="margin-top:10px">` + it.potes.map((p, pIdx) => `<div class="linha-pote"><span><strong>${p.prato}</strong> (${p.numero}/${p.total})</span><button class="btn-x" onclick="removerPote(${i}, ${pIdx})">✕</button></div>`).join('') + `</div>` : ""; let btnSanfona = qP > 0 ? `<button class="btn-toggle" onclick="togglePotes(${i})">${it.expandido ? '➖ Ocultar' : '➕ Ver'} Potes (${qP})</button>` : ""; return `<div class="box-estoque"><div style="display:flex; justify-content:space-between"><strong>${it.nome} (${formatarPeso(it.qtd)})</strong><span style="color:var(--sucesso); font-size:12px; font-weight:bold">${formatarDinheiro(it.totalGasto)}</span></div><div class="form-preparo"><label>Adicionar Pote:</label><div style="display:grid; grid-template-columns: 2fr 1fr; gap:5px"><input type="text" id="novo-prato-${i}" placeholder="Prato..."><input type="number" id="novo-potes-${i}" placeholder="Qtd"></div><button class="btn" style="background:var(--sucesso); padding: 8px; font-size: 13px; margin-top:8px" onclick="adicionarPrato(${i})">+ Incluir</button></div>${btnSanfona}${potesHTML}<button class="btn" style="background:#999; font-size:11px; margin-top:15px;" onclick="limparDoCongelador(${i})">Acabou tudo!</button></div>`; }).join(''); }
-    function adicionarPrato(idx) { let nP = document.getElementById(`novo-prato-${idx}`).value; let qP = parseInt(document.getElementById(`novo-potes-${idx}`).value); if (!nP || isNaN(qP) || qP <= 0) return alert("Preencha!"); for (let j = 1; j <= qP; j++) { db.estoque[idx].potes.push({ prato: nP, numero: j, total: qP }); } db.estoque[idx].expandido = true; save(); renderEstoque(); }
-    function togglePotes(idx) { db.estoque[idx].expandido = !db.estoque[idx].expandido; save(); renderEstoque(); }
-    function removerPote(i, pIdx) { db.estoque[i].potes.splice(pIdx, 1); if(db.estoque[i].potes.length === 0) it.expandido = false; save(); renderEstoque(); }
-    function limparDoCongelador(idx) { if(confirm("Acabou?")) { db.estoque.splice(idx, 1); save(); renderEstoque(); } }
-    function openTab(t) { document.querySelectorAll('.content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(t).classList.add('active'); event.currentTarget.classList.add('active'); }
-    
-    // Registro do Service Worker para PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').then(function(res) {
-          console.log('ServiceWorker registrado');
-        });
-      });
-    }
+    <!-- Modal Avançar Mês (Compras) -->
+    <div id="modal-avancar" class="fixed inset-0 bg-violet-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden text-center p-8 border border-violet-100">
+            <div class="w-20 h-20 bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <svg class="w-10 h-10 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            </div>
+            <h3 class="text-2xl font-black text-violet-900 mb-2">Avançar Mês?</h3>
+            <p class="text-violet-600 text-sm mb-6 font-medium">Sua lista atual será salva. Criaremos uma nova lista para o próximo mês mantendo os itens, mas zerando os preços.</p>
+            <div class="flex gap-3">
+                <button onclick="fecharModal('modal-avancar')" class="flex-1 py-3 bg-violet-50 text-violet-700 font-bold rounded-xl">Cancelar</button>
+                <button onclick="confirmarAvancarMes()" class="flex-1 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold rounded-xl shadow-md">Avançar</button>
+            </div>
+        </div>
+    </div>
 
-    init();
-</script>
+    <!-- Modal Nova/Editar Mistura (Congelador) -->
+    <div id="modal-pote" class="fixed inset-0 bg-blue-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden border border-blue-100">
+            <div class="p-5 border-b border-blue-100 flex justify-between items-center bg-blue-50/50">
+                <h3 class="text-xl font-extrabold text-blue-900" id="modal-pote-titulo">Cadastrar Mistura</h3>
+                <button onclick="fecharModal('modal-pote')" class="text-blue-400 hover:text-blue-600 p-1.5 bg-white rounded-xl border border-blue-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="pote-id">
+                <div>
+                    <label class="block text-xs font-bold text-blue-900 mb-1">Nome da Mistura</label>
+                    <input type="text" id="pote-nome" placeholder="Ex: Carne Moída Refogada" class="w-full px-4 py-3 rounded-xl border border-blue-200 outline-none font-bold bg-blue-50/30 focus:border-blue-400 focus:ring-1 focus:ring-blue-400">
+                </div>
+                <div class="flex gap-3">
+                    <div class="w-1/4">
+                        <label class="block text-xs font-bold text-blue-900 mb-1">Ícone</label>
+                        <input type="text" id="pote-icone" maxlength="2" placeholder="🌭" class="w-full px-2 py-3 rounded-xl border border-blue-200 outline-none text-center text-xl bg-blue-50/30 focus:border-blue-400 focus:ring-1 focus:ring-blue-400">
+                    </div>
+                    <div class="w-3/4">
+                        <label class="block text-xs font-bold text-blue-900 mb-1">Categoria (Prateleira)</label>
+                        <!-- Usando datalist permite selecionar ou digitar uma nova -->
+                        <input type="text" id="pote-categoria" list="lista-categorias-congelador" placeholder="Ex: Frango" class="w-full px-4 py-3 rounded-xl border border-blue-200 outline-none font-bold bg-blue-50/30 focus:border-blue-400 focus:ring-1 focus:ring-blue-400">
+                        <datalist id="lista-categorias-congelador">
+                            <!-- Preenchido via JS -->
+                        </datalist>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button onclick="fecharModal('modal-pote')" class="flex-1 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-200">Cancelar</button>
+                    <button onclick="salvarNovoPote()" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl shadow-md">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Título da Categoria do Congelador -->
+    <div id="modal-cat-congelador" class="fixed inset-0 bg-blue-950/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden border border-blue-100">
+            <div class="p-5 border-b border-blue-100 flex justify-between items-center bg-blue-50/50">
+                <h3 class="text-xl font-extrabold text-blue-900">Renomear Prateleira</h3>
+                <button onclick="fecharModal('modal-cat-congelador')" class="text-blue-400 hover:text-blue-600 p-1.5 bg-white rounded-xl border border-blue-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="cat-cong-old-name">
+                <div>
+                    <label class="block text-xs font-bold text-blue-900 mb-1">Novo nome para a categoria</label>
+                    <input type="text" id="cat-cong-new-name" class="w-full px-4 py-3 rounded-xl border border-blue-200 outline-none font-bold bg-blue-50/30 focus:border-blue-400 focus:ring-1 focus:ring-blue-400">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button onclick="fecharModal('modal-cat-congelador')" class="flex-1 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-200">Cancelar</button>
+                    <button onclick="salvarEdicaoCatCongelador()" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl shadow-md">Renomear Tudo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DADOS PADRÃO E ESTADO GLOBAL
+        // ==========================================
+        const categoriasBaseCompras = [
+            { idCat: 'cat-1', categoria: "Comidas", icone: "🍚", cor: "text-violet-600 bg-violet-50", itens: [
+                { id: 'i-1', nome: "Arroz (5kg)", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-2', nome: "Feijão (1kg)", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-3', nome: "Macarrão (pct)", quantidade: 4, preco: 0, comprado: false },
+                { id: 'i-4', nome: "Óleo", quantidade: 3, preco: 0, comprado: false },
+                { id: 'i-5', nome: "Azeite", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-6', nome: "Açúcar (1kg)", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-7', nome: "Café (500g)", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-8', nome: "Sal (1kg)", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-9', nome: "Farinha de Trigo", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-10', nome: "Molho de Tomate", quantidade: 5, preco: 0, comprado: false },
+                { id: 'i-11', nome: "Milho / Ervilha (Lata)", quantidade: 3, preco: 0, comprado: false },
+                { id: 'i-12', nome: "Creme de Leite", quantidade: 3, preco: 0, comprado: false },
+                { id: 'i-13', nome: "Leite Condensado", quantidade: 2, preco: 0, comprado: false }
+            ] },
+            { idCat: 'cat-2', categoria: "Mistura", icone: "🥩", cor: "text-fuchsia-600 bg-fuchsia-50", itens: [
+                { id: 'i-14', nome: "Ovos (Cartela c/ 30)", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-15', nome: "Frios: Mussarela", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-16', nome: "Frios: Presunto", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-17', nome: "Requeijão", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-18', nome: "Carnes/Aves p/ Congelar", quantidade: 5, preco: 0, comprado: false },
+                { id: 'i-19', nome: "Misturas Rápidas (Salsicha, etc)", quantidade: 2, preco: 0, comprado: false }
+            ] },
+            { idCat: 'cat-3', categoria: "Higiene", icone: "🧻", cor: "text-purple-600 bg-purple-50", itens: [
+                { id: 'i-20', nome: "Papel Higiênico (Pct)", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-21', nome: "Sabonete", quantidade: 8, preco: 0, comprado: false },
+                { id: 'i-22', nome: "Creme Dental", quantidade: 4, preco: 0, comprado: false },
+                { id: 'i-23', nome: "Shampoo", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-24', nome: "Condicionador", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-25', nome: "Desodorante", quantidade: 3, preco: 0, comprado: false },
+                { id: 'i-26', nome: "Hastes Flexíveis (Cotonete)", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-27', nome: "Absorvente", quantidade: 2, preco: 0, comprado: false }
+            ] },
+            { idCat: 'cat-4', categoria: "Limpeza", icone: "🧼", cor: "text-indigo-600 bg-indigo-50", itens: [
+                { id: 'i-28', nome: "Sabão em Pó/Líquido", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-29', nome: "Amaciante", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-30', nome: "Detergente", quantidade: 4, preco: 0, comprado: false },
+                { id: 'i-31', nome: "Esponja (Pct)", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-32', nome: "Desinfetante", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-33', nome: "Água Sanitária", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-34', nome: "Limpador Multiuso", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-35', nome: "Saco de Lixo", quantidade: 2, preco: 0, comprado: false }
+            ] },
+            { idCat: 'cat-5', categoria: "Lanchinhos", icone: "🧃", cor: "text-pink-600 bg-pink-50", itens: [
+                { id: 'i-36', nome: "Leite (Caixa)", quantidade: 12, preco: 0, comprado: false },
+                { id: 'i-37', nome: "Pão de Forma", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-38', nome: "Margarina/Manteiga", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-39', nome: "Iogurte/Danone", quantidade: 12, preco: 0, comprado: false },
+                { id: 'i-40', nome: "Biscoito Recheado", quantidade: 4, preco: 0, comprado: false },
+                { id: 'i-41', nome: "Biscoito Salgado", quantidade: 2, preco: 0, comprado: false },
+                { id: 'i-42', nome: "Achocolatado em Pó", quantidade: 1, preco: 0, comprado: false },
+                { id: 'i-43', nome: "Suco (Caixinha)", quantidade: 8, preco: 0, comprado: false }
+            ] }
+        ];
+
+        // Lista Customizada e Completa do Congelador com Emojis adequados
+        const estoqueCongeladorPadrao = [
+            // Frango
+            { id: "p-1", categoria: "Frango", nome: "Tulipa", potes: 0, icone: "🍗" },
+            { id: "p-2", categoria: "Frango", nome: "Filé de Frango", potes: 0, icone: "🐔" },
+            { id: "p-3", categoria: "Frango", nome: "Filé de Frango Empanado", potes: 0, icone: "🍤" },
+            { id: "p-4", categoria: "Frango", nome: "Hambúrguer de Frango", potes: 0, icone: "🍔" },
+            { id: "p-5", categoria: "Frango", nome: "Nuggets", potes: 0, icone: "🥟" },
+            { id: "p-6", categoria: "Frango", nome: "Frango p/ Estrogonofe", potes: 0, icone: "🍲" },
+            // Carne Bovina
+            { id: "p-7", categoria: "Carne Bovina", nome: "Hambúrguer de Carne", potes: 0, icone: "🍔" },
+            { id: "p-8", categoria: "Carne Bovina", nome: "Bife", potes: 0, icone: "🥩" },
+            { id: "p-9", categoria: "Carne Bovina", nome: "Carne Louca", potes: 0, icone: "🥪" },
+            { id: "p-10", categoria: "Carne Bovina", nome: "Almôndega", potes: 0, icone: "🧆" },
+            { id: "p-11", categoria: "Carne Bovina", nome: "Fígado", potes: 0, icone: "🥩" },
+            // Carne de Porco
+            { id: "p-12", categoria: "Carne de Porco", nome: "Bisteca", potes: 0, icone: "🍖" },
+            { id: "p-13", categoria: "Carne de Porco", nome: "Costelinha", potes: 0, icone: "🍖" },
+            { id: "p-14", categoria: "Carne de Porco", nome: "Linguiça", potes: 0, icone: "🌭" },
+            // Outros
+            { id: "p-15", categoria: "Outros", nome: "Salsicha", potes: 0, icone: "🌭" }
+        ];
+
+        let db = {
+            compras: { config: { mes: '', mercado: '' }, historico: {} },
+            congelador: { estoquePotes: [] } // Inicializado no Init
+        };
+        
+        let mesAtual = '';
+        let listaComprasAtual = [];
+        let estadoCategoriasCompras = {}; // NOVO: Controla se a categoria está aberta ou minimizada
+        const STORAGE_KEY = 'AppGestaoCasa_Definitivo_v4_Editavel'; // Atualizado para V4 para carregar a nova lista
+
+        // ==========================================
+        // FUNÇÕES GERAIS E INICIALIZAÇÃO
+        // ==========================================
+        function inicializarApp() {
+            const dbSalvo = localStorage.getItem(STORAGE_KEY);
+            if (dbSalvo) db = JSON.parse(dbSalvo);
+            
+            // Garante compras
+            if (!db.compras.config.mes) {
+                const hoje = new Date();
+                db.compras.config.mes = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+            }
+            mesAtual = db.compras.config.mes;
+            document.getElementById('input-mes').value = mesAtual;
+            document.getElementById('input-mercado').value = db.compras.config.mercado || '';
+
+            // Garante congelador
+            if (!db.congelador || !db.congelador.estoquePotes || db.congelador.estoquePotes.length === 0) {
+                db.congelador = { estoquePotes: JSON.parse(JSON.stringify(estoqueCongeladorPadrao)) };
+            }
+
+            carregarListaCompras();
+            renderizarCongelador();
+        }
+
+        function salvarApp() {
+            db.compras.config.mes = mesAtual;
+            db.compras.config.mercado = document.getElementById('input-mercado').value;
+            db.compras.historico[mesAtual] = JSON.parse(JSON.stringify(listaComprasAtual));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        }
+
+        function setAba(aba) {
+            const tabCompras = document.getElementById('tab-compras');
+            const tabCong = document.getElementById('tab-congelador');
+            const btnCompras = document.getElementById('btn-aba-compras');
+            const btnCong = document.getElementById('btn-aba-congelador');
+
+            if (aba === 'compras') {
+                tabCompras.classList.remove('hidden'); tabCong.classList.add('hidden');
+                btnCompras.className = "flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all bg-white text-violet-700 shadow-sm flex items-center justify-center gap-2";
+                btnCong.className = "flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all text-violet-100 hover:bg-white/10 flex items-center justify-center gap-2";
+            } else {
+                tabCompras.classList.add('hidden'); tabCong.classList.remove('hidden');
+                btnCompras.className = "flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all text-violet-100 hover:bg-white/10 flex items-center justify-center gap-2";
+                btnCong.className = "flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all bg-white text-violet-700 shadow-sm flex items-center justify-center gap-2";
+                renderizarCongelador();
+            }
+        }
+
+        function abrirModal(id) { 
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.add('opacity-100'); }, 10);
+        }
+        function fecharModal(id) { 
+            const m = document.getElementById(id);
+            m.classList.remove('opacity-100');
+            setTimeout(() => { m.classList.add('hidden'); }, 200);
+        }
+
+        // ==========================================
+        // LÓGICA DE COMPRAS
+        // ==========================================
+        function salvarConfigCompras() { salvarApp(); }
+
+        function carregarListaCompras() {
+            if (db.compras.historico[mesAtual]) {
+                listaComprasAtual = JSON.parse(JSON.stringify(db.compras.historico[mesAtual]));
+            } else {
+                const meses = Object.keys(db.compras.historico).sort();
+                if (meses.length > 0) {
+                    listaComprasAtual = JSON.parse(JSON.stringify(db.compras.historico[meses[meses.length - 1]]));
+                    listaComprasAtual.forEach(c => c.itens.forEach(i => { i.preco = 0; i.comprado = false; }));
+                } else {
+                    listaComprasAtual = JSON.parse(JSON.stringify(categoriasBaseCompras));
+                }
+            }
+            renderizarListaCompras(); salvarApp();
+        }
+
+        function mudarMes(novoMes) { if (!novoMes) return; mesAtual = novoMes; carregarListaCompras(); }
+
+        function renderizarListaCompras() {
+            const container = document.getElementById('lista-container');
+            container.innerHTML = '';
+            let totalGeral = 0; let totalItens = 0; let comprados = 0;
+            const cores = ["text-fuchsia-600 bg-fuchsia-50", "text-purple-600 bg-purple-50", "text-violet-600 bg-violet-50", "text-pink-600 bg-pink-50", "text-indigo-600 bg-indigo-50"];
+
+            listaComprasAtual.forEach((cat, indexCat) => {
+                let subCat = 0;
+                cat.itens.forEach(i => { totalItens++; if(i.comprado) comprados++; subCat += (i.quantidade * i.preco); });
+                totalGeral += subCat;
+                const cor = cores[indexCat % cores.length];
+                
+                // Verifica se a categoria está fechada (minimizado) ou aberta (padrão)
+                const isAberto = estadoCategoriasCompras[cat.idCat] !== false; 
+                const chevronClass = isAberto ? 'rotate-0' : '-rotate-90';
+                const collapseClass = isAberto ? '' : 'hidden';
+                
+                container.innerHTML += `
+                    <div class="bg-white rounded-3xl border border-violet-100 shadow-sm overflow-hidden mb-4">
+                        <div class="bg-gradient-to-r from-white to-violet-50/50 p-4 border-b border-violet-50 flex justify-between items-center select-none cursor-pointer hover:bg-violet-50/60 transition-colors" onclick="toggleCategoriaCompras('${cat.idCat}')">
+                            <div class="flex items-center gap-3">
+                                <span class="w-10 h-10 flex items-center justify-center rounded-xl text-xl shadow-sm ${cor}">${cat.icone}</span>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h2 class="font-extrabold text-violet-950 text-[15px] sm:text-lg">${cat.categoria}</h2>
+                                        <button onclick="event.stopPropagation(); abrirModalCategoriaCompras('${cat.idCat}')" class="text-violet-300 hover:text-fuchsia-500 hover:bg-violet-100 p-1 rounded-md transition-colors" title="Editar Categoria">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        </button>
+                                    </div>
+                                    <p class="text-[11px] text-violet-400 font-bold">${cat.itens.length} itens</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white border border-violet-100 px-3 py-1.5 rounded-xl shadow-sm flex flex-col items-end">
+                                    <span class="text-[9px] uppercase font-bold text-violet-400">Subtotal</span>
+                                    <span class="text-sm font-black text-violet-800">R$ ${subCat.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <div id="chevron-${cat.idCat}" class="text-violet-400 transform transition-transform duration-300 ${chevronClass}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="collapse-${cat.idCat}" class="${collapseClass}">
+                            <div class="divide-y divide-violet-50/50" id="itens-${cat.idCat}"></div>
+                            <div class="p-2 sm:p-3 bg-violet-50/10">
+                                <button onclick="abrirModalItem('${cat.idCat}')" class="w-full py-2.5 border-2 border-dashed border-violet-200 text-violet-500 rounded-xl hover:bg-white hover:border-fuchsia-400 hover:text-fuchsia-600 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-bold">
+                                    + Adicionar em ${cat.categoria}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listaComprasAtual.forEach(cat => {
+                const contItens = document.getElementById(`itens-${cat.idCat}`);
+                if(cat.itens.length===0) contItens.innerHTML = `<p class="text-center text-xs text-violet-300 py-3 font-medium">Vazio.</p>`;
+                cat.itens.forEach(item => {
+                    const val = (item.quantidade * item.preco).toFixed(2).replace('.',',');
+                    contItens.innerHTML += `
+                        <div class="group flex items-center justify-between gap-1 sm:gap-2 p-2 sm:px-4 sm:py-3 hover:bg-violet-50/60 ${item.comprado ? 'bg-violet-50/40 opacity-75' : ''}">
+                            <div class="flex-shrink-0 cursor-pointer p-1" onclick="toggleComprado('${cat.idCat}', '${item.id}')">
+                                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-md border-2 flex items-center justify-center transition-all ${item.comprado ? 'bg-gradient-to-br from-fuchsia-400 to-violet-500 border-transparent shadow-sm' : 'border-violet-200 bg-white group-hover:border-fuchsia-300'}">
+                                    ${item.comprado ? '<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <input type="number" min="0.1" step="0.1" value="${item.quantidade}" onchange="atualizarCampo('${cat.idCat}','${item.id}','quantidade',this.value)" class="w-10 sm:w-12 py-1 text-center bg-violet-50/50 border border-violet-100 rounded text-xs sm:text-sm font-bold text-violet-900 focus:ring-1 focus:ring-violet-400 outline-none">
+                            </div>
+                            <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleComprado('${cat.idCat}', '${item.id}')">
+                                <p class="text-[11px] sm:text-[14px] font-bold text-gray-700 truncate ${item.comprado ? 'line-through text-violet-400' : ''}">${item.nome}</p>
+                            </div>
+                            <div class="flex-shrink-0 flex items-center bg-violet-50/50 border border-violet-100 rounded px-1 sm:px-1.5">
+                                <span class="text-[9px] sm:text-[10px] text-violet-400 font-bold mr-1">R$</span>
+                                <input type="number" step="0.01" min="0" placeholder="0.00" value="${item.preco>0?item.preco:''}" onchange="atualizarCampo('${cat.idCat}','${item.id}','preco',this.value)" class="w-12 sm:w-16 py-1 text-right bg-transparent text-xs sm:text-sm font-bold text-violet-900 outline-none placeholder-violet-200">
+                            </div>
+                            <div class="flex-shrink-0 w-14 sm:w-16 text-right" onclick="toggleComprado('${cat.idCat}', '${item.id}')">
+                                <span class="block text-[8px] sm:hidden text-violet-400 font-bold uppercase">Total</span>
+                                <span class="text-xs sm:text-sm font-black ${item.comprado && item.preco>0 ? 'text-fuchsia-600' : 'text-violet-800'}">R$ ${val}</span>
+                            </div>
+                            <div class="flex-shrink-0 flex gap-0 sm:gap-1">
+                                <button onclick="abrirModalItem('${cat.idCat}', '${item.id}')" class="p-1.5 text-violet-300 hover:text-violet-600 hover:bg-violet-100 rounded-lg"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                                <button onclick="deletarItemCompras('${cat.idCat}', '${item.id}')" class="p-1.5 text-violet-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            document.getElementById('valor-total-geral').innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+            const pct = totalItens === 0 ? 0 : Math.round((comprados/totalItens)*100);
+            document.getElementById('barra-progresso').style.width = `${pct}%`;
+            document.getElementById('texto-progresso').innerText = `${comprados}/${totalItens} (${pct}%)`;
+        }
+
+        function toggleCategoriaCompras(idCat) {
+            // Se ainda não tiver estado definido, assumimos que estava aberta (true)
+            if (estadoCategoriasCompras[idCat] === undefined) {
+                estadoCategoriasCompras[idCat] = true;
+            }
+            // Inverte o estado (de aberto pra fechado ou vice-versa)
+            estadoCategoriasCompras[idCat] = !estadoCategoriasCompras[idCat];
+            
+            const container = document.getElementById(`collapse-${idCat}`);
+            const icone = document.getElementById(`chevron-${idCat}`);
+            
+            if (estadoCategoriasCompras[idCat]) {
+                container.classList.remove('hidden');
+                icone.classList.remove('-rotate-90');
+            } else {
+                container.classList.add('hidden');
+                icone.classList.add('-rotate-90');
+            }
+        }
+
+        function toggleComprado(cId, iId) { const cat = listaComprasAtual.find(c => c.idCat === cId); const item = cat.itens.find(i => i.id === iId); item.comprado = !item.comprado; salvarApp(); renderizarListaCompras(); }
+        function atualizarCampo(cId, iId, campo, val) { const cat = listaComprasAtual.find(c => c.idCat === cId); const item = cat.itens.find(i => i.id === iId); if(campo==='quantidade') item.quantidade = parseFloat(val)||1; if(campo==='preco') { item.preco = parseFloat(val)||0; if(item.preco>0 && !item.comprado) item.comprado = true; } salvarApp(); renderizarListaCompras(); }
+        function deletarItemCompras(cId, iId) { const cat = listaComprasAtual.find(c => c.idCat === cId); cat.itens = cat.itens.filter(i => i.id !== iId); salvarApp(); renderizarListaCompras(); }
+
+        function abrirModalItem(idCatPre = null, idItem = null) {
+            const sel = document.getElementById('modal-item-categoria');
+            sel.innerHTML = '';
+            listaComprasAtual.forEach(c => sel.innerHTML += `<option value="${c.idCat}">${c.icone} ${c.categoria}</option>`);
+            
+            if(idItem && idCatPre) {
+                document.getElementById('modal-item-titulo').innerText = "Editar Produto";
+                const item = listaComprasAtual.find(c=>c.idCat===idCatPre).itens.find(i=>i.id===idItem);
+                document.getElementById('modal-item-id').value = item.id;
+                document.getElementById('modal-item-nome').value = item.nome;
+                document.getElementById('modal-item-qtd').value = item.quantidade;
+                document.getElementById('modal-item-preco').value = item.preco>0?item.preco:'';
+                document.getElementById('modal-item-categoria').value = idCatPre;
+            } else {
+                document.getElementById('modal-item-titulo').innerText = "Novo Produto";
+                document.getElementById('modal-item-id').value = '';
+                document.getElementById('modal-item-nome').value = '';
+                document.getElementById('modal-item-qtd').value = '1';
+                document.getElementById('modal-item-preco').value = '';
+                if(idCatPre) document.getElementById('modal-item-categoria').value = idCatPre;
+            }
+            abrirModal('modal-item');
+        }
+        function salvarModalItem() {
+            const id = document.getElementById('modal-item-id').value;
+            const nome = document.getElementById('modal-item-nome').value.trim();
+            const qtd = parseFloat(document.getElementById('modal-item-qtd').value)||1;
+            const prc = parseFloat(document.getElementById('modal-item-preco').value)||0;
+            const idCat = document.getElementById('modal-item-categoria').value;
+            if(!nome) return;
+
+            const cat = listaComprasAtual.find(c => c.idCat === idCat);
+            if(id) {
+                listaComprasAtual.forEach(c => {
+                    const idx = c.itens.findIndex(i=>i.id===id);
+                    if(idx>-1) {
+                        const item = c.itens[idx];
+                        item.nome = nome; item.quantidade = qtd; item.preco = prc;
+                        if(c.idCat !== idCat) { c.itens.splice(idx,1); cat.itens.push(item); }
+                    }
+                });
+            } else {
+                cat.itens.push({ id: 'i-'+Date.now(), nome: nome, quantidade: qtd, preco: prc, comprado: prc>0 });
+            }
+            salvarApp(); renderizarListaCompras(); fecharModal('modal-item');
+        }
+
+        function abrirModalCategoriaCompras(idCat) {
+            const cat = listaComprasAtual.find(c => c.idCat === idCat);
+            document.getElementById('modal-cat-id').value = cat.idCat;
+            document.getElementById('modal-cat-icone').value = cat.icone;
+            document.getElementById('modal-cat-nome').value = cat.categoria;
+            abrirModal('modal-categoria');
+        }
+        function salvarModalCategoria() {
+            const cat = listaComprasAtual.find(c => c.idCat === document.getElementById('modal-cat-id').value);
+            if(cat) {
+                cat.icone = document.getElementById('modal-cat-icone').value || "📦";
+                cat.categoria = document.getElementById('modal-cat-nome').value || "Categoria";
+                salvarApp(); renderizarListaCompras();
+            }
+            fecharModal('modal-categoria');
+        }
+
+        function confirmarAvancarMes() {
+            salvarApp();
+            let [ano, mes] = mesAtual.split('-').map(Number);
+            if(++mes > 12) { mes = 1; ano++; }
+            const prox = `${ano}-${String(mes).padStart(2,'0')}`;
+            document.getElementById('input-mes').value = prox;
+            mudarMes(prox);
+            fecharModal('modal-avancar');
+        }
+
+        // ==========================================
+        // LÓGICA DO CONGELADOR (Potes e Estoque Dinâmico)
+        // ==========================================
+        
+        // Coleta dinamicamente todas as categorias que existem no estoque atual
+        function obterCategoriasDoCongelador() {
+            const categoriasUnicas = new Set();
+            db.congelador.estoquePotes.forEach(p => {
+                if(p.categoria) categoriasUnicas.add(p.categoria);
+            });
+            // Adiciona as padrões caso não existam para não deixar vazio se apagar tudo
+            ["Frango", "Carne Bovina", "Carne de Porco", "Outros"].forEach(c => categoriasUnicas.add(c));
+            return Array.from(categoriasUnicas);
+        }
+
+        function renderizarCongelador() {
+            const contEstoque = document.getElementById('estoque-congelador-container');
+            if(!contEstoque) return;
+            
+            // Agrupar por categoria
+            const categoriasMap = {};
+            db.congelador.estoquePotes.forEach(it => {
+                const cat = it.categoria || "Outros";
+                if (!categoriasMap[cat]) categoriasMap[cat] = [];
+                categoriasMap[cat].push(it);
+            });
+
+            // Ordena as categorias dinâmicas (Padrões primeiro, depois alfabético)
+            const ordemPreferida = ["Frango", "Carne Bovina", "Carne de Porco"];
+            const categoriasDisponiveis = obterCategoriasDoCongelador().sort((a, b) => {
+                let idxA = ordemPreferida.indexOf(a); let idxB = ordemPreferida.indexOf(b);
+                if(idxA === -1) idxA = 99; if(idxB === -1) idxB = 99;
+                if (idxA === idxB) return a.localeCompare(b);
+                return idxA - idxB;
+            });
+
+            let htmlCompleto = "";
+
+            categoriasDisponiveis.forEach(cat => {
+                const itensDestaCat = categoriasMap[cat] || [];
+                
+                // Título da Categoria com Lápis de Edição
+                htmlCompleto += `
+                    <div class="col-span-full mt-4 mb-2 flex items-center gap-2 border-b border-blue-200 pb-2 group">
+                        <h3 class="text-xl font-extrabold text-blue-900">${cat}</h3>
+                        <span class="bg-blue-100 text-blue-700 text-[11px] font-black px-2 py-0.5 rounded-full">${itensDestaCat.length}</span>
+                        <button onclick="abrirModalEdicaoCatCongelador('${cat}')" class="ml-2 text-blue-300 hover:text-blue-600 transition-colors p-1 bg-white rounded-md shadow-sm border border-blue-50 opacity-0 group-hover:opacity-100 focus:opacity-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                    </div>
+                `;
+                
+                // Cartões dos Itens daquela Categoria
+                if(itensDestaCat.length === 0) {
+                    htmlCompleto += `<div class="col-span-full text-xs text-blue-400 font-medium pb-2">Prateleira vazia.</div>`;
+                }
+                
+                itensDestaCat.forEach(it => {
+                    htmlCompleto += `
+                        <div class="col-span-1 bg-white rounded-3xl p-5 border border-blue-100 shadow-sm flex flex-col justify-between gap-4 relative group hover:shadow-md transition-all">
+                            
+                            <div class="flex items-center gap-4 pr-12">
+                                <span class="text-4xl drop-shadow-sm">${it.icone}</span>
+                                <div>
+                                    <h4 class="font-black text-blue-950 text-base leading-tight">${it.nome}</h4>
+                                    <p class="text-[11px] text-blue-400 font-bold mt-0.5 uppercase tracking-wide">Potinhos guardados</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between bg-blue-50/70 rounded-2xl p-2 border border-blue-100/50 w-full mt-2">
+                                <button onclick="alterarQtdPotes('${it.id}', -1)" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-blue-500 shadow-sm font-black text-2xl hover:bg-blue-100 hover:text-blue-600 active:scale-95 transition-all">-</button>
+                                <span class="text-4xl font-black text-blue-900 w-16 text-center">${it.potes}</span>
+                                <button onclick="alterarQtdPotes('${it.id}', 1)" class="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 text-white shadow-sm font-black text-2xl hover:shadow-md hover:from-blue-500 hover:to-cyan-600 active:scale-95 transition-all">+</button>
+                            </div>
+                            
+                            <div class="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="abrirModalPote('${it.id}')" class="text-blue-300 hover:text-blue-600 p-2 bg-white rounded-xl shadow-sm border border-blue-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button onclick="excluirPote('${it.id}')" class="text-blue-300 hover:text-rose-500 p-2 bg-white rounded-xl shadow-sm border border-blue-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            contEstoque.innerHTML = htmlCompleto;
+        }
+
+        function alterarQtdPotes(id, delta) {
+            const pote = db.congelador.estoquePotes.find(p => p.id === id);
+            if(pote) {
+                pote.potes += delta;
+                if(pote.potes < 0) pote.potes = 0;
+                salvarApp(); renderizarCongelador();
+            }
+        }
+
+        function excluirPote(id) {
+            db.congelador.estoquePotes = db.congelador.estoquePotes.filter(p => p.id !== id);
+            salvarApp(); renderizarCongelador();
+        }
+
+        // Modal de Cadastro/Edição de Potes (Congelador)
+        function atualizarDatalistCategorias() {
+            const datalist = document.getElementById('lista-categorias-congelador');
+            datalist.innerHTML = '';
+            obterCategoriasDoCongelador().forEach(cat => {
+                datalist.innerHTML += `<option value="${cat}">`;
+            });
+        }
+
+        function abrirModalPote(id = null) {
+            atualizarDatalistCategorias();
+            
+            if(id) {
+                const pote = db.congelador.estoquePotes.find(p => p.id === id);
+                document.getElementById('modal-pote-titulo').innerText = "Editar Mistura";
+                document.getElementById('pote-id').value = pote.id;
+                document.getElementById('pote-nome').value = pote.nome;
+                document.getElementById('pote-icone').value = pote.icone;
+                document.getElementById('pote-categoria').value = pote.categoria;
+            } else {
+                document.getElementById('modal-pote-titulo').innerText = "Cadastrar Mistura";
+                document.getElementById('pote-id').value = '';
+                document.getElementById('pote-nome').value = '';
+                document.getElementById('pote-icone').value = '';
+                document.getElementById('pote-categoria').value = '';
+            }
+            abrirModal('modal-pote');
+        }
+
+        function salvarNovoPote() {
+            const id = document.getElementById('pote-id').value;
+            const nome = document.getElementById('pote-nome').value.trim();
+            const icone = document.getElementById('pote-icone').value || "🧊";
+            let categoria = document.getElementById('pote-categoria').value.trim() || "Outros";
+            
+            if(!nome) return; // Validação simples
+            
+            // Corrige inicial maiúscula para manter o padrão se o usuário digitar tudo minúsculo
+            categoria = categoria.charAt(0).toUpperCase() + categoria.slice(1);
+            
+            if(id) {
+                // Editando existente
+                const pote = db.congelador.estoquePotes.find(p => p.id === id);
+                if(pote) {
+                    pote.nome = nome;
+                    pote.icone = icone;
+                    pote.categoria = categoria;
+                }
+            } else {
+                // Criando novo
+                db.congelador.estoquePotes.push({
+                    id: 'p-' + Date.now(),
+                    nome: nome,
+                    categoria: categoria,
+                    potes: 0,
+                    icone: icone
+                });
+            }
+            
+            salvarApp();
+            renderizarCongelador();
+            fecharModal('modal-pote');
+        }
+
+        // Modal para Renomear Categoria Inteira do Congelador
+        function abrirModalEdicaoCatCongelador(nomeAntigo) {
+            document.getElementById('cat-cong-old-name').value = nomeAntigo;
+            document.getElementById('cat-cong-new-name').value = nomeAntigo;
+            abrirModal('modal-cat-congelador');
+        }
+        
+        function salvarEdicaoCatCongelador() {
+            const nomeAntigo = document.getElementById('cat-cong-old-name').value;
+            let nomeNovo = document.getElementById('cat-cong-new-name').value.trim();
+            
+            if(nomeNovo && nomeNovo !== nomeAntigo) {
+                // Primeira letra maiúscula
+                nomeNovo = nomeNovo.charAt(0).toUpperCase() + nomeNovo.slice(1);
+                
+                // Atualiza todos os potes que tinham a categoria antiga para a nova
+                db.congelador.estoquePotes.forEach(pote => {
+                    if(pote.categoria === nomeAntigo) {
+                        pote.categoria = nomeNovo;
+                    }
+                });
+                
+                salvarApp();
+                renderizarCongelador();
+            }
+            fecharModal('modal-cat-congelador');
+        }
+
+        // ==========================================
+        // INICIAR
+        // ==========================================
+        window.onload = inicializarApp;
+
+    </script>
 </body>
 </html>
